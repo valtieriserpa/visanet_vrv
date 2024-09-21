@@ -9,8 +9,8 @@ module.exports = async (req, res) => {
 
     console.log("Valor recebido em centavos do frontend:", amount);
 
-    // Verificar se o valor está presente e é um número válido
-    if (!amount || isNaN(amount)) {
+    // Verificar se o valor está presente, é um número válido e maior que zero
+    if (!amount || isNaN(amount) || amount <= 0) {
         console.error("Erro: Valor inválido ou ausente.");
         return res.status(400).json({ error: 'Valor inválido ou ausente.' });
     }
