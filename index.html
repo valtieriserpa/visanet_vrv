@@ -53,8 +53,8 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             background-color: white;
-            width: 100%;  /* Largura total */
-            margin: 10px 0;  /* Margem entre os campos */
+            width: 100%;
+            margin: 10px 0;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
@@ -71,7 +71,7 @@
         }
 
         .visanet-logo img {
-            height: 80px;  /* Tamanho ajustado para a logo */
+            height: 80px;
         }
 
         /* Estilizando as logomarcas */
@@ -96,7 +96,8 @@
 
     <!-- Formulário de pagamento -->
     <form id="payment-form">
-        <input type="number" id="amount" class="amount" placeholder="Digite o valor (R$)" min="1" required><br>
+        <!-- Campo de valor ajustado para aceitar valores decimais -->
+        <input type="number" id="amount" class="amount" placeholder="Digite o valor (R$)" min="0.01" step="0.01" required><br>
         <div id="card-element" class="field StripeElement"></div> <!-- Stripe Card Element -->
         <button type="submit">Pagar</button>
         <div id="error-message"></div> <!-- Exibe erros -->
@@ -123,8 +124,9 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor digitado no campo de valor
-            var amount = document.getElementById('amount').value * 100; // Valor em centavos
+            // Obtenha o valor digitado no campo de valor e converta para centavos
+            var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
+            var amountInCents = Math.round(amount * 100); // Converte para centavos
 
             // Faz a requisição ao backend para criar o PaymentIntent
             fetch('/api/payment', { // Esta URL precisa ser ajustada para o backend
@@ -132,7 +134,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amount }) // Envia o valor ao backend
+                body: JSON.stringify({ amount: amountInCents }) // Envia o valor em centavos ao backend
             })
             .then(response => response.json())
             .then(data => {
