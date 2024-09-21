@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar ou Doar</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Fundo com gradiente suave */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background: linear-gradient(135deg, #f0f2f5, #dfe4ea);
+            padding: 0;
+        }
+
+        /* Estilizando o formulário */
+        form {
+            display: inline-block;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 280px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Ajustando campos do cartão um abaixo do outro */
+        .StripeElement {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: white;
+            width: 100%;  /* Largura total */
+            margin: 10px 0;  /* Margem entre os campos */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        /* Centralizar a logo Visanet */
+        .visanet-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .visanet-logo img {
+            height: 80px;  /* Tamanho ajustado para a logo */
+        }
+
+        /* Estilizando as logomarcas */
+        .logos {
+            margin-top: 20px;
+        }
+
+        .logos img {
+            height: 50px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logo Visanet centralizada -->
+    <div class="visanet-logo">
+        <img src="https://i.postimg.cc/BZgbMdmz/logovisanet-svg.png" alt="Visanet">
+    </div>
+
+    <h2>Pagar ou Doar</h2>
+
+    <!-- Formulário de pagamento -->
+    <form id="payment-form">
+        <input type="number" id="amount" class="amount" placeholder="Digite o valor (R$)" min="1" required><br>
+        <div id="card-element" class="field StripeElement"></div> <!-- Stripe Card Element -->
+        <button type="submit">Pagar</button>
+        <div id="error-message"></div> <!-- Exibe erros -->
+    </form>
+
+    <!-- Seção com logomarcas dos cartões -->
+    <div class="logos">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Visa.svg/1200px-Visa.svg.png" alt="Visa">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png" alt="Mastercard">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/American_Express_logo.svg" alt="American Express">
+    </div>
+
+    <script>
+        // Inicialize o Stripe com a chave pública
+        var stripe = Stripe('pk_test_51PcxROR10LmPtaVuSwf7x0i7EumztcQJaSmXFntJmDAap0vk8dG99sefjBrE5xCD2f3AnLG4yS7bc52VdmT7VsDq00rLqvBCgo');
+
+        // Inicializa os elementos do Stripe
+        var elements = stripe.elements();
+        var cardElement = elements.create('card', { hidePostalCode: true }); // Remove o campo CEP
+        cardElement.mount('#card-element'); // Monta o elemento do cartão
+
+        // Manipula o envio do formulário
+        var form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Obtenha o valor digitado no campo de valor
+            var amount = document.getElementById('amount').value * 100; // Valor em centavos
+
+            // Faz a requisição ao backend para criar o PaymentIntent
+            fetch('/api/payment', { // Esta URL precisa ser ajustada para o backend
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount: amount }) // Envia o valor ao backend
+            })
+            .then(response => response.json())
+            .then(data => {
+                var clientSecret = data.clientSecret; // Recebe o clientSecret do backend
+
+                // Processa o pagamento diretamente na página (sem redirecionar para o checkout do Stripe)
+                stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: cardElement
+                    }
+                }).then(function(result) {
+                    if (result.error) {
+                        // Exibe erro
+                        document.getElementById('error-message').textContent = result.error.message;
+                    } else {
+                        // Exibe sucesso
+                        alert('Pagamento realizado com sucesso!');
+                    }
+                });
+            })
+            .catch(error => {
+                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Ignorar o arquivo .env
+.env
+
+# Ignorar outros arquivos que não devem ser versionados
+node_modules/
+.DS_Store
