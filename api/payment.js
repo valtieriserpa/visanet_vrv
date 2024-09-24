@@ -5,21 +5,22 @@ require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
-    const { amount } = req.body;
+    const { amount, currency } = req.body;
 
     console.log("Valor recebido em centavos do frontend:", amount);
+    console.log("Moeda recebida:", currency);
 
-    // Verificar se o valor está presente, é um número válido e maior que zero
-    if (!amount || isNaN(amount) || amount <= 0) {
-        console.error("Erro: Valor inválido ou ausente.");
-        return res.status(400).json({ error: 'Valor inválido ou ausente.' });
+    // Verificar se o valor e a moeda estão presentes e são válidos
+    if (!amount || isNaN(amount) || amount <= 0 || !currency) {
+        console.error("Erro: Valor ou moeda inválido ou ausente.");
+        return res.status(400).json({ error: 'Valor ou moeda inválido ou ausente.' });
     }
 
     try {
-        // Criar um PaymentIntent com o valor já convertido em centavos pelo frontend
+        // Criar um PaymentIntent com o valor já convertido em centavos e a moeda recebida
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,  // O valor já está em centavos, não multiplicar por 100
-            currency: 'usd',  // Alterado para dólares (USD)
+            currency: currency.toLowerCase(),  // Usar a moeda enviada pelo frontend
         });
 
         console.log("PaymentIntent criado com sucesso:", paymentIntent);
