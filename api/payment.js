@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
         // Criar um PaymentIntent com o valor já convertido em centavos pelo frontend
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,  // O valor já está em centavos, não multiplicar por 100
-            currency: 'brl',
+            currency: 'usd', // Alterado para dólares (USD)
         });
 
         console.log("PaymentIntent criado com sucesso:", paymentIntent);
