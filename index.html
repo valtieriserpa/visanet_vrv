@@ -40,7 +40,7 @@
             margin: 0 auto 20px auto;
         }
 
-        input, .StripeElement {
+        input, .StripeElement, select {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -105,7 +105,12 @@
 
         <!-- Formulário de pagamento -->
         <form id="payment-form">
-            <input type="number" id="amount" class="amount" placeholder="Digite o valor US($)" min="0.01" step="0.01" required>
+            <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required>
+            <select id="currency" required>
+                <option value="usd">USD</option>
+                <option value="brl">BRL</option>
+                <option value="eur">EUR</option>
+            </select>
             <div id="card-element" class="StripeElement"></div>
             <button type="submit">Pagar</button>
             <div id="error-message"></div>
@@ -137,6 +142,7 @@
             // Obtenha o valor digitado no campo de valor e converta para centavos
             var amount = parseFloat(document.getElementById('amount').value);
             var amountInCents = Math.round(amount * 100);
+            var currency = document.getElementById('currency').value;
 
             // Faz a requisição ao backend para criar o PaymentIntent
             fetch('/api/payment', {
@@ -144,7 +150,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amountInCents, currency: 'usd' })
+                body: JSON.stringify({ amount: amountInCents, currency: currency })
             })
             .then(response => response.json())
             .then(data => {
