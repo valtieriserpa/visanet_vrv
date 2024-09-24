@@ -12,9 +12,13 @@
             margin: 0;
             padding: 0;
             background: linear-gradient(135deg, #f0f2f5, #dfe4ea);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .container {
+            flex: 1;
             margin-top: 50px;
             display: flex;
             flex-direction: column;
@@ -69,6 +73,16 @@
         .stripe-logo img {
             height: 100px;
         }
+
+        /* Faixa na parte inferior da página */
+        footer {
+            background-color: #32325d;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +103,11 @@
             <div id="error-message"></div>
         </form>
     </div>
+
+    <!-- Faixa inferior -->
+    <footer>
+        © 2024 VRV TECHNOLOGY AND SOLUTIONS LLC. Todos os direitos reservados.
+    </footer>
 
     <script>
         // Inicialize o Stripe com a chave pública
