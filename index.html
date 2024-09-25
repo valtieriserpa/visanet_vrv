@@ -34,12 +34,6 @@
             text-align: center;
         }
 
-        p {
-            font-size: 16px;
-            color: #32325d;
-            text-align: center;
-        }
-
         input, .StripeElement {
             width: 100%;
             padding: 12px;
@@ -78,91 +72,51 @@
             font-size: 14px;
             margin-top: 10px;
         }
-
-        footer {
-            margin-top: 20px;
-            font-size: 14px;
-            text-align: center;
-            color: #6b7c93;
-        }
-
-        .footer-text {
-            font-size: 12px;
-            color: #6b7c93;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Descrição do Produto -->
         <h2>Consultoria Técnica Sensoriamento Remoto</h2>
-
-        <!-- Descrição do valor -->
-        <h3>Produto: Consultoria Técnica Sensoriamento Remoto</h3>
         <p>Insira o valor que deseja pagar:</p>
 
-        <!-- Formulário de pagamento -->
         <form id="payment-form">
-            <!-- Campo de valor inserido pelo usuário -->
-            <input type="number" id="amount" class="amount" placeholder="Digite o valor do produto" min="0.01" step="0.01" required>
-
-            <!-- Campo para o nome do titular do cartão -->
+            <input type="number" id="amount" placeholder="Digite o valor do produto" min="0.01" step="0.01" required>
             <input type="text" id="cardholder-name" placeholder="Nome do titular do cartão" required>
-            
-            <!-- Campo para o email -->
             <input type="email" id="email" placeholder="Digite seu email" required>
-
-            <!-- Campo para os dados do cartão -->
             <div id="card-element" class="StripeElement"></div>
             <button type="submit">Pagar</button>
             <div id="error-message"></div>
         </form>
-
-        <!-- Informação sobre a contribuição de CO₂ -->
-        <footer>
-            VRV SERVIÇOS contribuirá com 0,5% da sua compra ou doação para remover CO₂ da atmosfera.
-            <div class="footer-text">
-                © 2024 VRV SERVIÇOS LTDA-EPP. Todos os direitos reservados.
-            </div>
-        </footer>
     </div>
 
     <script>
-        // Inicialize o Stripe com a chave pública
+        // Inicialize o Stripe com a chave pública de produção
         var stripe = Stripe('pk_live_51Q32TNP0f8oIFrv0p2BtXxrfvojhKpYyd3dM2xEO7nJcw93LPFq7W5okIubZBMSSbCQa4U8qkZ0zL0Z8hDbrM0ru00Jjv4JGb3');
 
-        // Inicializa os elementos do Stripe
         var elements = stripe.elements();
         var cardElement = elements.create('card', { hidePostalCode: true });
         cardElement.mount('#card-element');
 
-        // Manipula o envio do formulário
         var form = document.getElementById('payment-form');
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor inserido pelo usuário
-            var amount = parseFloat(document.getElementById('amount').value);
-            var amountInCents = Math.round(amount * 100); // Converter para centavos
-
-            // Obtenha o nome do titular do cartão e o email
+            var amount = parseFloat(document.getElementById('amount').value) * 100;  // Valor em centavos
             var cardholderName = document.getElementById('cardholder-name').value;
             var email = document.getElementById('email').value;
 
-            // Faz a requisição ao backend para criar o PaymentIntent
             fetch('/api/payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ 
-                    amount: amountInCents, 
-                    currency: 'usd',  // Moeda fixa: USD
+                body: JSON.stringify({
+                    amount: amount,
+                    currency: 'usd',
                     cardholderName: cardholderName,
                     email: email,
-                    product: 'Consultoria Técnica Sensoriamento Remoto'  // Descrição do produto
+                    product: 'Consultoria Técnica Sensoriamento Remoto'
                 })
             })
             .then(response => response.json())
@@ -173,25 +127,20 @@
                 }
 
                 var clientSecret = data.clientSecret;
-                console.log("ClientSecret recebido:", clientSecret);
-
-                // Processa o pagamento diretamente na página
                 return stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement,
                         billing_details: {
-                            name: cardholderName,  // Adiciona o nome do titular
-                            email: email  // Adiciona o email
+                            name: cardholderName,
+                            email: email
                         }
                     }
                 });
             })
             .then(function(result) {
                 if (result.error) {
-                    // Exibe erro
                     document.getElementById('error-message').textContent = result.error.message;
                 } else {
-                    // Exibe sucesso
                     alert('Pagamento realizado com sucesso!');
                 }
             })
