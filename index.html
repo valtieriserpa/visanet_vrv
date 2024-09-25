@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donate Stripe</title>
+    <title>Consultoria Técnica Sensoriamento Remoto - Pagamento</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
         body {
@@ -27,20 +27,20 @@
             max-width: 400px;
         }
 
-        h2 {
+        h2, h3 {
             font-size: 22px;
             color: #32325d;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        .stripe-logo img {
-            height: 40px;
-            display: block;
-            margin: 0 auto 20px auto;
+        p {
+            font-size: 16px;
+            color: #32325d;
+            text-align: center;
         }
 
-        input, .StripeElement, select {
+        input, .StripeElement {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -96,21 +96,25 @@
 <body>
 
     <div class="container">
-        <!-- Logo do Stripe -->
-        <div class="stripe-logo">
-            <img src="https://i.postimg.cc/bJZHm6MV/Stripe.png" alt="Stripe">
-        </div>
+        <!-- Descrição do Produto -->
+        <h2>Consultoria Técnica Sensoriamento Remoto</h2>
 
-        <h2>Pay or Donate</h2>
+        <!-- Descrição do valor -->
+        <h3>Produto: Consultoria Técnica Sensoriamento Remoto</h3>
+        <p>Insira o valor que deseja pagar:</p>
 
         <!-- Formulário de pagamento -->
         <form id="payment-form">
-            <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required>
-            <select id="currency" required>
-                <option value="usd">USD</option>
-                <option value="brl">BRL</option>
-                <option value="eur">EUR</option>
-            </select>
+            <!-- Campo de valor inserido pelo usuário -->
+            <input type="number" id="amount" class="amount" placeholder="Digite o valor do produto" min="0.01" step="0.01" required>
+
+            <!-- Campo para o nome do titular do cartão -->
+            <input type="text" id="cardholder-name" placeholder="Nome do titular do cartão" required>
+            
+            <!-- Campo para o email -->
+            <input type="email" id="email" placeholder="Digite seu email" required>
+
+            <!-- Campo para os dados do cartão -->
             <div id="card-element" class="StripeElement"></div>
             <button type="submit">Pagar</button>
             <div id="error-message"></div>
@@ -127,7 +131,7 @@
 
     <script>
         // Inicialize o Stripe com a chave pública
-        var stripe = Stripe('pk_live_51PtIop06Ma2Y4mbb5uAmixEXvcsAad41go0FusVYARwloqUsYkG9N1ZcCBQGpeFq2Zu8CTxLUjGk4gucWErQ8i9f00xVDwr46z');
+        var stripe = Stripe('pk_test_51Q32TNP0f8oIFrv07XJFzPo3ZGclizUDvkUkJrDdUFPpRr3qwDmD5O0chfjwJ3NWsN4pS8djPa1XvS39waR1jF2t00ybevzZ7G');
 
         // Inicializa os elementos do Stripe
         var elements = stripe.elements();
@@ -139,10 +143,13 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor digitado no campo de valor e converta para centavos
+            // Obtenha o valor inserido pelo usuário
             var amount = parseFloat(document.getElementById('amount').value);
-            var amountInCents = Math.round(amount * 100);
-            var currency = document.getElementById('currency').value;
+            var amountInCents = Math.round(amount * 100); // Converter para centavos
+
+            // Obtenha o nome do titular do cartão e o email
+            var cardholderName = document.getElementById('cardholder-name').value;
+            var email = document.getElementById('email').value;
 
             // Faz a requisição ao backend para criar o PaymentIntent
             fetch('/api/payment', {
@@ -150,7 +157,13 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amountInCents, currency: currency })
+                body: JSON.stringify({ 
+                    amount: amountInCents, 
+                    currency: 'usd',  // Moeda fixa: USD
+                    cardholderName: cardholderName,
+                    email: email,
+                    product: 'Consultoria Técnica Sensoriamento Remoto'  // Descrição do produto
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -160,7 +173,11 @@
                 // Processa o pagamento diretamente na página
                 return stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
-                        card: cardElement
+                        card: cardElement,
+                        billing_details: {
+                            name: cardholderName,  // Adiciona o nome do titular
+                            email: email  // Adiciona o email
+                        }
                     }
                 });
             })
