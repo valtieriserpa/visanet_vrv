@@ -131,7 +131,7 @@
 
     <script>
         // Inicialize o Stripe com a chave pública
-        var stripe = Stripe('pk_test_51Q32TNP0f8oIFrv07XJFzPo3ZGclizUDvkUkJrDdUFPpRr3qwDmD5O0chfjwJ3NWsN4pS8djPa1XvS39waR1jF2t00ybevzZ7G');
+        var stripe = Stripe('pk_live_51PtIop06Ma2Y4mbb5uAmixEXvcsAad41go0FusVYARwloqUsYkG9N1ZcCBQGpeFq2Zu8CTxLUjGk4gucWErQ8i9f00xVDwr46z');
 
         // Inicializa os elementos do Stripe
         var elements = stripe.elements();
@@ -167,8 +167,13 @@
             })
             .then(response => response.json())
             .then(data => {
+                if (data.error) {
+                    document.getElementById('error-message').textContent = data.error;
+                    return;
+                }
+
                 var clientSecret = data.clientSecret;
-                console.log("ClientSecret recebido:", clientSecret); // Verificar o clientSecret
+                console.log("ClientSecret recebido:", clientSecret);
 
                 // Processa o pagamento diretamente na página
                 return stripe.confirmCardPayment(clientSecret, {
