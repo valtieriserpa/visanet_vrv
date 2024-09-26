@@ -5,11 +5,12 @@ require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
-    const { amount, currency, cardholderName, email, product } = req.body;
+    const { amount, currency, cardholderName, email, cardType, product } = req.body;
 
     console.log("Valor recebido:", amount);
     console.log("Moeda recebida:", currency);
     console.log("Nome do titular:", cardholderName);
+    console.log("Tipo de Cartão:", cardType);  // Exibir se o cliente informou "credit" ou "debit"
     console.log("E-mail:", email);
 
     if (!amount || isNaN(amount) || amount <= 0 || !currency) {
@@ -17,7 +18,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Criar um PaymentIntent com a moeda e valor
+        // Criar o PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,
             currency: currency,
@@ -25,24 +26,16 @@ module.exports = async (req, res) => {
             description: `Pagamento de ${product} para ${cardholderName}`,
             metadata: {
                 customer_name: cardholderName,
-                product: product
+                product: product,
+                card_type: cardType  // Armazenar o tipo de cartão informado pelo cliente
             }
         });
 
-        console.log("PaymentIntent criado:", paymentIntent);
-
-        // Verificar se o cartão é de débito ou crédito
-        const paymentMethod = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
-        if (paymentMethod.card && paymentMethod.card.funding === 'debit') {
-            console.log("Cartão de débito detectado.");
-        } else {
-            console.log("Cartão de crédito detectado.");
-        }
-
-        // Se disponível, use o Visa Direct (somente um exemplo básico)
-        if (currency === 'usd' && paymentMethod.card.brand === 'visa') {
-            console.log("Verificando Visa Direct...");
-            // Aqui seria o código para iniciar o pagamento via Visa Direct, se for compatível com sua conta
+        // Verificar se o cliente informou débito ou crédito manualmente
+        if (cardType === 'debit') {
+            console.log("Cartão de débito informado pelo cliente.");
+        } else if (cardType === 'credit') {
+            console.log("Cartão de crédito informado pelo cliente.");
         }
 
         res.status(200).json({ clientSecret: paymentIntent.client_secret });
