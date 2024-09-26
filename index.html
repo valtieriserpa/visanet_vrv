@@ -34,7 +34,7 @@
             text-align: center;
         }
 
-        input, .StripeElement {
+        input, .StripeElement, select {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -78,12 +78,26 @@
 
     <div class="container">
         <h2>Consultoria Técnica Sensoriamento Remoto</h2>
-        <p>Insira o valor que deseja pagar:</p>
+        <p>Insira o valor que deseja pagar e selecione a moeda:</p>
 
         <form id="payment-form">
+            <!-- Valor do pagamento -->
             <input type="number" id="amount" placeholder="Digite o valor do produto" min="0.01" step="0.01" required>
+
+            <!-- Selecione a moeda -->
+            <select id="currency" required>
+                <option value="usd" selected>Dólar (USD)</option>
+                <option value="eur">Euro (EUR)</option>
+                <option value="brl">Real (BRL)</option>
+            </select>
+
+            <!-- Nome do titular do cartão -->
             <input type="text" id="cardholder-name" placeholder="Nome do titular do cartão" required>
+
+            <!-- E-mail -->
             <input type="email" id="email" placeholder="Digite seu email" required>
+
+            <!-- Campo de pagamento do cartão -->
             <div id="card-element" class="StripeElement"></div>
             <button type="submit">Pagar</button>
             <div id="error-message"></div>
@@ -102,9 +116,10 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            var amount = parseFloat(document.getElementById('amount').value) * 100;  // Valor em centavos
+            var amount = parseFloat(document.getElementById('amount').value) * 100;  // Converter para centavos
             var cardholderName = document.getElementById('cardholder-name').value;
             var email = document.getElementById('email').value;
+            var currency = document.getElementById('currency').value;  // Obter a moeda selecionada
 
             fetch('/api/payment', {
                 method: 'POST',
@@ -113,7 +128,7 @@
                 },
                 body: JSON.stringify({
                     amount: amount,
-                    currency: 'usd',
+                    currency: currency,
                     cardholderName: cardholderName,
                     email: email,
                     product: 'Consultoria Técnica Sensoriamento Remoto'
