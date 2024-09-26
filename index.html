@@ -78,7 +78,7 @@
 
     <div class="container">
         <h2>Consultoria Técnica Sensoriamento Remoto</h2>
-        <p>Insira o valor que deseja pagar e selecione a moeda:</p>
+        <p>Insira o valor que deseja pagar e selecione a moeda e tipo de cartão:</p>
 
         <form id="payment-form">
             <!-- Valor do pagamento -->
@@ -89,6 +89,12 @@
                 <option value="usd" selected>Dólar (USD)</option>
                 <option value="eur">Euro (EUR)</option>
                 <option value="brl">Real (BRL)</option>
+            </select>
+
+            <!-- Selecione o tipo de cartão -->
+            <select id="card-type" required>
+                <option value="credit" selected>Cartão de Crédito</option>
+                <option value="debit">Cartão de Débito</option>
             </select>
 
             <!-- Nome do titular do cartão -->
@@ -120,6 +126,7 @@
             var cardholderName = document.getElementById('cardholder-name').value;
             var email = document.getElementById('email').value;
             var currency = document.getElementById('currency').value;  // Obter a moeda selecionada
+            var cardType = document.getElementById('card-type').value;  // Obter se é crédito ou débito
 
             fetch('/api/payment', {
                 method: 'POST',
@@ -131,6 +138,7 @@
                     currency: currency,
                     cardholderName: cardholderName,
                     email: email,
+                    cardType: cardType,  // Passar o tipo de cartão para o backend
                     product: 'Consultoria Técnica Sensoriamento Remoto'
                 })
             })
@@ -142,6 +150,8 @@
                 }
 
                 var clientSecret = data.clientSecret;
+
+                // Confirmar o pagamento com os dados do cartão
                 return stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement,
@@ -154,8 +164,10 @@
             })
             .then(function(result) {
                 if (result.error) {
+                    // Se houver algum erro na confirmação do pagamento
                     document.getElementById('error-message').textContent = result.error.message;
                 } else {
+                    // Se o pagamento for bem-sucedido
                     alert('Pagamento realizado com sucesso!');
                 }
             })
