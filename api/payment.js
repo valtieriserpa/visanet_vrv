@@ -13,7 +13,10 @@ module.exports = async (req, res) => {
     console.log("Tipo de Cartão:", cardType);  // Exibir se o cliente informou "credit" ou "debit"
     console.log("E-mail:", email);
 
-    if (!amount || isNaN(amount) || amount <= 0 || !currency) {
+    const supportedCurrencies = ['usd', 'eur', 'brl'];
+
+    // Validar o valor e a moeda
+    if (!amount || isNaN(amount) || amount <= 0 || !supportedCurrencies.includes(currency.toLowerCase())) {
         return res.status(400).json({ error: 'Valor ou moeda inválidos.' });
     }
 
@@ -38,9 +41,17 @@ module.exports = async (req, res) => {
             console.log("Cartão de crédito informado pelo cliente.");
         }
 
+        // Enviar o clientSecret ao frontend
         res.status(200).json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
         console.error("Erro ao criar PaymentIntent:", error);
-        res.status(500).json({ error: error.message });
+
+        if (error.type === 'StripeCardError') {
+            res.status(400).json({ error: error.message });
+        } else if (error.type === 'StripeInvalidRequestError') {
+            res.status(400).json({ error: 'Requisição inválida. Verifique os parâmetros enviados.' });
+        } else {
+            res.status(500).json({ error: 'Erro no servidor. Tente novamente mais tarde.' });
+        }
     }
 };
