@@ -11,23 +11,39 @@ module.exports = async (req, res) => {
     console.log("Moeda recebida:", currency);
     console.log("Nome do titular:", cardholderName);
     console.log("E-mail:", email);
-    console.log("Produto:", product);
 
     if (!amount || isNaN(amount) || amount <= 0 || !currency) {
         return res.status(400).json({ error: 'Valor ou moeda inválidos.' });
     }
 
     try {
+        // Criar um PaymentIntent com a moeda e valor
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,  // Valor em centavos
+            amount: amount,
             currency: currency,
             receipt_email: email,
             description: `Pagamento de ${product} para ${cardholderName}`,
-            metadata: { 
-                customer_name: cardholderName, 
-                product: product 
+            metadata: {
+                customer_name: cardholderName,
+                product: product
             }
         });
+
+        console.log("PaymentIntent criado:", paymentIntent);
+
+        // Verificar se o cartão é de débito ou crédito
+        const paymentMethod = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
+        if (paymentMethod.card && paymentMethod.card.funding === 'debit') {
+            console.log("Cartão de débito detectado.");
+        } else {
+            console.log("Cartão de crédito detectado.");
+        }
+
+        // Se disponível, use o Visa Direct (somente um exemplo básico)
+        if (currency === 'usd' && paymentMethod.card.brand === 'visa') {
+            console.log("Verificando Visa Direct...");
+            // Aqui seria o código para iniciar o pagamento via Visa Direct, se for compatível com sua conta
+        }
 
         res.status(200).json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
