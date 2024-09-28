@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultoria Técnica Sensoriamento Remoto - Pagamento1</title>
+    <title>1-Consultoria Técnica Sensoriamento Remoto - Pagamento</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
         body {
@@ -112,7 +112,7 @@
 
     <script>
         // Inicialize o Stripe com a chave pública
-        var stripe = Stripe('pk_test_51Q35jyRwpq1Is6Tt6xvEYLBgmyXlJr4ZDuLC7XBfJC0r45ZJIIDwf31jFFVXew65ZbodJIGXzXnhiqml26VXpr03008N58Ww8U');
+        var stripe = Stripe('pk_live_51Q35jyRwpq1Is6TtpYqeyW16I23cd7yXdzWhmagGEiofbCtZnu5ezdajQXLw41BH9x00tBqpkoBpG3o37TYLJuBQ00LoMezdAY');
 
         var elements = stripe.elements();
         var cardElement = elements.create('card', { hidePostalCode: true });
