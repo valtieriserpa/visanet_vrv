@@ -3,206 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultoria Técnica Sensoriamento Remoto - Pagamento</title>
+    <title>Pagar ou Doar</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
+        /* Fundo com gradiente suave */
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background: #f6f9fc;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        h2 {
-            font-size: 22px;
-            color: #32325d;
-            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
             text-align: center;
+            margin-top: 50px;
+            background: linear-gradient(135deg, #f0f2f5, #dfe4ea);
+            padding: 0;
         }
 
-        input, .StripeElement, select {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #e6ebf1;
-            border-radius: 6px;
-            margin-bottom: 12px;
+        /* Estilizando o formulário */
+        form {
+            display: inline-block;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
             background-color: white;
-            box-shadow: inset 0 1px 3px rgba(50, 50, 93, 0.1);
-            transition: all 150ms ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        input:focus, .StripeElement--focus {
-            box-shadow: 0 1px 3px 0 rgba(50, 50, 93, 0.15), 0 0 0 2px rgba(50, 151, 211, 0.3);
-            border-color: #409eff;
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 280px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         button {
-            background-color: #6772e5;
+            background-color: #4CAF50;
             color: white;
-            font-size: 16px;
-            padding: 12px;
             border: none;
-            border-radius: 6px;
             cursor: pointer;
-            width: 100%;
             transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #5469d4;
+            background-color: #45a049;
+        }
+
+        /* Ajustando campos do cartão um abaixo do outro */
+        .StripeElement {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: white;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         #error-message {
             color: red;
-            font-size: 14px;
             margin-top: 10px;
         }
 
-        #success-message {
-            color: green;
-            font-size: 14px;
-            margin-top: 10px;
+        /* Centralizar a logo do Stripe */
+        .stripe-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .stripe-logo img {
+            height: 80px;
+        }
+
+        /* Estilizando as logomarcas */
+        .logos {
+            margin-top: 20px;
+        }
+
+        .logos img {
+            height: 50px;
+            margin: 0 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>1-Consultoria Técnica Sensoriamento Remoto</h2>
-        <p>Insira o valor que deseja pagar, selecione a moeda e o tipo de cartão:</p>
+    <!-- Logo Stripe centralizada -->
+    <div class="stripe-logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" alt="Stripe">
+    </div>
 
-        <form id="payment-form">
-            <!-- Valor do pagamento -->
-            <label for="amount">Valor do Pagamento:</label>
-            <input type="number" id="amount" placeholder="Digite o valor do produto" min="0.01" step="0.01" required>
+    <h2>Pagar ou Doar</h2>
 
-            <!-- Selecione a moeda -->
-            <label for="currency">Moeda:</label>
-            <select id="currency" required>
-                <option value="usd" selected>Dólar (USD)</option>
-                <option value="eur">Euro (EUR)</option>
-                <option value="brl">Real (BRL)</option>
-            </select>
+    <!-- Formulário de pagamento -->
+    <form id="payment-form">
+        <!-- Campo de valor ajustado para aceitar valores decimais -->
+        <input type="number" id="amount" class="amount" placeholder="Digite o valor (R$)" min="0.01" step="0.01" required><br>
+        <div id="card-element" class="field StripeElement"></div> <!-- Stripe Card Element -->
+        <button type="submit">Pagar</button>
+        <div id="error-message"></div> <!-- Exibe erros -->
+    </form>
 
-            <!-- Selecione o tipo de cartão -->
-            <label for="card-type">Tipo de Cartão:</label>
-            <select id="card-type" required>
-                <option value="credit" selected>Cartão de Crédito</option>
-                <option value="debit">Cartão de Débito</option>
-            </select>
-
-            <!-- Nome do titular do cartão -->
-            <label for="cardholder-name">Nome do Titular do Cartão:</label>
-            <input type="text" id="cardholder-name" placeholder="Nome do titular do cartão" required>
-
-            <!-- E-mail -->
-            <label for="email">E-mail:</label>
-            <input type="email" id="email" placeholder="Digite seu email" required>
-
-            <!-- Campo de pagamento do cartão -->
-            <div id="card-element" class="StripeElement"></div>
-
-            <button type="submit">Pagar</button>
-
-            <div id="error-message"></div>
-            <div id="success-message"></div>
-        </form>
+    <!-- Seção com logomarcas dos cartões -->
+    <div class="logos">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Visa.svg/1200px-Visa.svg.png" alt="Visa">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png" alt="Mastercard">
     </div>
 
     <script>
-        // Inicialize o Stripe com a chave pública live
-        var stripe = Stripe('pk_live_51Q35jyRwpq1Is6TtpYqeyW16I23cd7yXdzWhmagGEiofbCtZnu5ezdajQXLw41BH9x00tBqpkoBpG3o37TYLJuBQ00LoMezdAY');
+        // Inicialize o Stripe com a chave de teste
+        var stripe = Stripe('pk_test_51Q35jyRwpq1Is6Tt6xvEYLBgmyXlJr4ZDuLC7XBfJC0r45ZJIIDwf31jFFVXew65ZbodJIGXzXnhiqml26VXpr03008N58Ww8U');
 
+        // Inicializa os elementos do Stripe
         var elements = stripe.elements();
-        var cardElement = elements.create('card', { hidePostalCode: true });
-        cardElement.mount('#card-element');
+        var cardElement = elements.create('card', { hidePostalCode: true }); // Remove o campo CEP
+        cardElement.mount('#card-element'); // Monta o elemento do cartão
 
+        // Manipula o envio do formulário
         var form = document.getElementById('payment-form');
-
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Capturar os dados do formulário
-            var amount = parseFloat(document.getElementById('amount').value) * 100;  // Converter para centavos
-            var cardholderName = document.getElementById('cardholder-name').value;
-            var email = document.getElementById('email').value;
-            var currency = document.getElementById('currency').value;
-            var cardType = document.getElementById('card-type').value;
+            // Obtenha o valor digitado no campo de valor e converta para centavos
+            var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
+            var amountInCents = Math.round(amount * 100); // Converte para centavos
 
-            // Fazer a requisição para o backend
-            fetch('https://stripe-br-vrv.vercel.app/api/payment', {  
+            // Faz a requisição ao backend para criar o PaymentIntent
+            fetch('/api/payment', { // Esta URL precisa ser ajustada para o backend
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    amount: amount,
-                    currency: currency,
-                    cardholderName: cardholderName,
-                    email: email,
-                    cardType: cardType,
-                    product: 'Consultoria Técnica Sensoriamento Remoto'
-                })
+                body: JSON.stringify({ amount: amountInCents }) // Envia o valor em centavos ao backend
             })
-            .then(response => {
-                // Verificar se o servidor retornou um erro
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.error || 'Erro desconhecido');
-                    });
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Client Secret recebido:', data.clientSecret);
+                var clientSecret = data.clientSecret; // Recebe o clientSecret do backend
 
-                if (data.error) {
-                    document.getElementById('error-message').textContent = data.error;
-                    return;
-                }
-
-                var clientSecret = data.clientSecret;
-
-                // Confirmar o pagamento com os dados do cartão
-                return stripe.confirmCardPayment(clientSecret, {
+                // Processa o pagamento diretamente na página (sem redirecionar para o checkout do Stripe)
+                stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
-                        card: cardElement,
-                        billing_details: {
-                            name: cardholderName,
-                            email: email
-                        }
+                        card: cardElement
+                    }
+                }).then(function(result) {
+                    if (result.error) {
+                        // Exibe erro
+                        document.getElementById('error-message').textContent = result.error.message;
+                    } else {
+                        // Exibe sucesso
+                        alert('Pagamento realizado com sucesso!');
                     }
                 });
             })
-            .then(function(result) {
-                if (result.error) {
-                    // Exibe a mensagem de erro se o pagamento falhar
-                    document.getElementById('error-message').textContent = result.error.message;
-                } else {
-                    // Exibe a mensagem de sucesso se o pagamento for bem-sucedido
-                    document.getElementById('success-message').textContent = 'Pagamento realizado com sucesso!';
-                    window.location.href = '/confirmacao-pagamento'; // Redireciona para página de confirmação
-                }
-            })
             .catch(error => {
-                // Exibe o erro se houver falha no processamento do pagamento
-                console.error('Erro ao processar o pagamento:', error);
-                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
             });
         });
     </script>
