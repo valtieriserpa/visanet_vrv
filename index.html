@@ -26,7 +26,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        input, button {
+        input, button, select {
             margin: 10px 0;
             padding: 10px;
             width: 280px;
@@ -97,7 +97,15 @@
     <!-- Formulário de pagamento -->
     <form id="payment-form">
         <!-- Campo de valor ajustado para aceitar valores decimais -->
-        <input type="number" id="amount" class="amount" placeholder="Digite o valor (R$)" min="0.01" step="0.01" required><br>
+        <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required><br>
+
+        <!-- Seleção da moeda -->
+        <select id="currency" required>
+            <option value="brl">Real (BRL)</option>
+            <option value="usd">Dólar (USD)</option>
+            <option value="eur">Euro (EUR)</option>
+        </select><br>
+
         <div id="card-element" class="field StripeElement"></div> <!-- Stripe Card Element -->
         <button type="submit">Pagar</button>
         <div id="error-message"></div> <!-- Exibe erros -->
@@ -123,8 +131,9 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor digitado no campo de valor e converta para centavos
+            // Obtenha o valor digitado no campo de valor e a moeda selecionada
             var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
+            var currency = document.getElementById('currency').value; // Pega a moeda selecionada
             var amountInCents = Math.round(amount * 100); // Converte para centavos
 
             // Faz a requisição ao backend para criar o PaymentIntent
@@ -133,7 +142,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amountInCents }) // Envia o valor em centavos ao backend
+                body: JSON.stringify({ amount: amountInCents, currency: currency }) // Envia o valor em centavos e a moeda ao backend
             })
             .then(response => response.json())
             .then(data => {
