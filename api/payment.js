@@ -7,6 +7,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 module.exports = async (req, res) => {
     const { amount, currency, cardholderName, email, cardType, product } = req.body;
 
+    // Logs de desenvolvimento para monitoramento (em produção, evite logar dados sensíveis)
     console.log("Valor recebido:", amount);
     console.log("Moeda recebida:", currency);
     console.log("Nome do titular:", cardholderName);
@@ -46,6 +47,7 @@ module.exports = async (req, res) => {
     } catch (error) {
         console.error("Erro ao criar PaymentIntent:", error);
 
+        // Tratamento de erros do Stripe
         if (error.type === 'StripeCardError') {
             res.status(400).json({ error: error.message });
         } else if (error.type === 'StripeInvalidRequestError') {
