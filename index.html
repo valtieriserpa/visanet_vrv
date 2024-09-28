@@ -96,11 +96,14 @@
 
     <!-- Formulário de pagamento -->
     <form id="payment-form">
-        <!-- Campo de valor ajustado para aceitar valores decimais -->
-        <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required><br>
+        <!-- Campo para o nome do cliente -->
+        <input type="text" id="name" placeholder="Digite seu nome" required><br>
 
         <!-- Campo para e-mail -->
         <input type="email" id="email" placeholder="Digite seu e-mail" required><br>
+
+        <!-- Campo de valor ajustado para aceitar valores decimais -->
+        <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required><br>
 
         <!-- Seleção da moeda -->
         <select id="currency" required>
@@ -134,11 +137,11 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor, moeda e e-mail digitado no formulário
+            // Obtenha o nome, valor, moeda e e-mail digitado no formulário
+            var name = document.getElementById('name').value; // Pega o nome do cliente
+            var email = document.getElementById('email').value; // Pega o e-mail
             var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
             var currency = document.getElementById('currency').value; // Pega a moeda selecionada
-            var email = document.getElementById('email').value; // Pega o e-mail
-
             var amountInCents = Math.round(amount * 100); // Converte para centavos
 
             // Faz a requisição ao backend para criar o PaymentIntent
@@ -147,7 +150,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amountInCents, currency: currency, email: email }) // Envia o valor em centavos, moeda e email ao backend
+                body: JSON.stringify({ amount: amountInCents, currency: currency, email: email, name: name }) // Envia o valor em centavos, moeda, email e nome ao backend
             })
             .then(response => response.json())
             .then(data => {
