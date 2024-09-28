@@ -77,7 +77,7 @@
 <body>
 
     <div class="container">
-        <h2>Consultoria Técnica Sensoriamento Remoto</h2>
+        <h2>1-Consultoria Técnica Sensoriamento Remoto</h2>
         <p>Insira o valor que deseja pagar e selecione a moeda e tipo de cartão:</p>
 
         <form id="payment-form">
@@ -133,7 +133,8 @@
             var currency = document.getElementById('currency').value;
             var cardType = document.getElementById('card-type').value;
 
-            fetch('https://seu-backend-de-producao.com/api/payment', {  // Mude para a URL correta do seu backend em produção
+            // Aqui, substituímos o domínio correto
+            fetch('https://stripe-br-vrv.vercel.app/api/payment', {  
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,12 +148,7 @@
                     product: 'Consultoria Técnica Sensoriamento Remoto'
                 })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor: ' + response.statusText);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 console.log('Client Secret recebido:', data.clientSecret); // Log adicional
 
@@ -184,7 +180,7 @@
             })
             .catch(error => {
                 console.error('Erro ao processar o pagamento:', error);
-                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento. Verifique sua conexão ou tente novamente mais tarde.';
+                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
             });
         });
     </script>
