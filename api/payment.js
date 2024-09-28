@@ -7,24 +7,22 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 module.exports = async (req, res) => {
     const { amount, currency, cardholderName, email, cardType, product } = req.body;
 
-    // Logs de desenvolvimento para monitoramento (em produção, evite logar dados sensíveis)
-    console.log("Valor recebido:", amount);
-    console.log("Moeda recebida:", currency);
-    console.log("Nome do titular:", cardholderName);
-    console.log("Tipo de Cartão:", cardType);  // Exibir se o cliente informou "credit" ou "debit"
-    console.log("E-mail:", email);
+    // Validar se todos os campos necessários estão presentes
+    if (!amount || !currency || !cardholderName || !email || !product) {
+        return res.status(400).json({ error: 'Faltam dados obrigatórios no corpo da requisição.' });
+    }
 
     const supportedCurrencies = ['usd', 'eur', 'brl'];
 
     // Validar o valor e a moeda
-    if (!amount || isNaN(amount) || amount <= 0 || !supportedCurrencies.includes(currency.toLowerCase())) {
+    if (isNaN(amount) || amount <= 0 || !supportedCurrencies.includes(currency.toLowerCase())) {
         return res.status(400).json({ error: 'Valor ou moeda inválidos.' });
     }
 
     try {
         // Criar o PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,
+            amount: Math.round(amount), // Certifique-se de enviar um valor em centavos (inteiro)
             currency: currency,
             receipt_email: email,
             description: `Pagamento de ${product} para ${cardholderName}`,
@@ -35,12 +33,8 @@ module.exports = async (req, res) => {
             }
         });
 
-        // Verificar se o cliente informou débito ou crédito manualmente
-        if (cardType === 'debit') {
-            console.log("Cartão de débito informado pelo cliente.");
-        } else if (cardType === 'credit') {
-            console.log("Cartão de crédito informado pelo cliente.");
-        }
+        // Log do PaymentIntent para verificar a criação
+        console.log('PaymentIntent criado com sucesso:', paymentIntent.id);
 
         // Enviar o clientSecret ao frontend
         res.status(200).json({ clientSecret: paymentIntent.client_secret });
