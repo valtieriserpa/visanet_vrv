@@ -1,7 +1,7 @@
 // Carregar as variáveis de ambiente do arquivo .env
 require('dotenv').config();
 
-// Inicializar o Stripe com a chave secreta de produção
+// Inicializar o Stripe com a chave secreta de produção (STRIPE_SECRET_KEY_LIVE)
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_LIVE);
 
 // Verificar se a chave está configurada corretamente
@@ -10,14 +10,15 @@ if (!process.env.STRIPE_SECRET_KEY_LIVE) {
 }
 
 const express = require('express');
-const cors = require('cors'); // Para adicionar segurança com CORS
+const cors = require('cors'); // Middleware de segurança para habilitar CORS
 
 const app = express();
 
 // Middleware para interpretar JSON e habilitar CORS
 app.use(express.json());
-app.use(cors());  // Habilitar CORS para proteger a API
+app.use(cors());  // Habilitar CORS para aceitar requisições do frontend
 
+// Endpoint de pagamento
 app.post('/api/payment', async (req, res) => {
     const { amount, currency, cardholderName, email, cardType, product } = req.body;
 
@@ -70,8 +71,8 @@ app.post('/api/payment', async (req, res) => {
     }
 });
 
-// Iniciar o servidor na porta 3000
-const PORT = process.env.PORT || 3000;  // Usar variável de ambiente para a porta
+// Iniciar o servidor na porta fornecida pelo ambiente (Vercel atribui automaticamente a porta)
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
