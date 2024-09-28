@@ -133,7 +133,7 @@
             var currency = document.getElementById('currency').value;
             var cardType = document.getElementById('card-type').value;
 
-            fetch('https://seu-backend-de-producao.com/api/payment', {  // Mude para a URL do seu backend em produção
+            fetch('https://seu-backend-de-producao.com/api/payment', {  // Mude para a URL correta do seu backend em produção
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,7 +147,12 @@
                     product: 'Consultoria Técnica Sensoriamento Remoto'
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor: ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Client Secret recebido:', data.clientSecret); // Log adicional
 
@@ -179,7 +184,7 @@
             })
             .catch(error => {
                 console.error('Erro ao processar o pagamento:', error);
-                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
+                document.getElementById('error-message').textContent = 'Erro ao processar o pagamento. Verifique sua conexão ou tente novamente mais tarde.';
             });
         });
     </script>
