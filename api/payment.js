@@ -2,12 +2,18 @@
 require('dotenv').config();
 
 // Inicializar o Stripe com a chave secreta de produção
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_LIVE);
 
-module.exports = async (req, res) => {
+const express = require('express');
+const app = express();
+
+// Middleware para interpretar JSON
+app.use(express.json());
+
+app.post('/api/payment', async (req, res) => {
     const { amount, currency, cardholderName, email, cardType, product } = req.body;
 
-    // Validar se todos os campos necessários estão presentes
+    // Verifique se os campos obrigatórios estão presentes
     if (!amount || !currency || !cardholderName || !email || !product) {
         return res.status(400).json({ error: 'Faltam dados obrigatórios no corpo da requisição.' });
     }
@@ -20,9 +26,9 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Criar o PaymentIntent
+        // Criar o PaymentIntent no Stripe
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount), // Certifique-se de enviar um valor em centavos (inteiro)
+            amount: Math.round(amount), // Certifique-se de enviar o valor em centavos
             currency: currency,
             receipt_email: email,
             description: `Pagamento de ${product} para ${cardholderName}`,
@@ -33,7 +39,7 @@ module.exports = async (req, res) => {
             }
         });
 
-        // Log do PaymentIntent para verificar a criação
+        // Log do PaymentIntent para verificação
         console.log('PaymentIntent criado com sucesso:', paymentIntent.id);
 
         // Enviar o clientSecret ao frontend
@@ -41,7 +47,6 @@ module.exports = async (req, res) => {
     } catch (error) {
         console.error("Erro ao criar PaymentIntent:", error);
 
-        // Tratamento de erros do Stripe
         if (error.type === 'StripeCardError') {
             res.status(400).json({ error: error.message });
         } else if (error.type === 'StripeInvalidRequestError') {
@@ -50,4 +55,9 @@ module.exports = async (req, res) => {
             res.status(500).json({ error: 'Erro no servidor. Tente novamente mais tarde.' });
         }
     }
-};
+});
+
+// Iniciar o servidor na porta 3000
+app.listen(3000, () => {
+    console.log('Servidor rodando na porta 3000');
+});
