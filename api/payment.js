@@ -5,12 +5,11 @@ require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
-    const { amount, currency } = req.body;
+    const { amount, currency, email } = req.body;
 
-    // Log para verificar os valores recebidos
-    console.log("Valor recebido em centavos do frontend:", amount, "Moeda:", currency);
+    console.log("Valor recebido em centavos do frontend:", amount, "Moeda:", currency, "E-mail:", email);
 
-    // Verificar se o valor e a moeda são válidos
+    // Verificar se o valor, moeda e e-mail são válidos
     if (!amount || isNaN(amount) || amount <= 0) {
         console.error("Erro: Valor inválido ou ausente.");
         return res.status(400).json({ error: 'Valor inválido ou ausente.' });
@@ -21,11 +20,18 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Moeda inválida ou ausente.' });
     }
 
+    if (!email) {
+        console.error("Erro: E-mail inválido ou ausente.");
+        return res.status(400).json({ error: 'E-mail inválido ou ausente.' });
+    }
+
     try {
-        // Criar um PaymentIntent com o valor em centavos e a moeda selecionada
+        // Criar um PaymentIntent com o valor em centavos, moeda e o e-mail
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,  // O valor já está em centavos
             currency: currency,  // Define a moeda escolhida (BRL, USD ou EUR)
+            receipt_email: email,  // Associar o e-mail ao pagamento
+            description: 'Pagamento de Consultoria Técnica'
         });
 
         console.log("PaymentIntent criado com sucesso:", paymentIntent);
