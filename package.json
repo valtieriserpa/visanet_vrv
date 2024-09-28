@@ -1,7 +1,7 @@
 {
-  "name": "visanet_vrv",
+  "name": "meu-projeto",
   "version": "1.0.0",
-  "description": "Servidor para processar pagamentos com Stripe",
+  "description": "Servidor de pagamento com Stripe",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
