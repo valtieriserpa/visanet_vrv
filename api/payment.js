@@ -1,7 +1,7 @@
 // Carregar as variáveis de ambiente do arquivo .env
 require('dotenv').config();
 
-// Inicializar o Stripe com a chave secreta
+// Inicializar o Stripe com a chave secreta de produção
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Criar um PaymentIntent com o valor, moeda, e associar o nome e e-mail
+        // Criar um PaymentIntent com o valor, moeda, nome e e-mail
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,  // O valor já está em centavos
             currency: currency,  // Define a moeda escolhida (BRL, USD ou EUR)
