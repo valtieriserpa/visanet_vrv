@@ -1,78 +1,33 @@
 // Carregar as variáveis de ambiente do arquivo .env
 require('dotenv').config();
 
-// Inicializar o Stripe com a chave secreta de produção (STRIPE_SECRET_KEY_LIVE)
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_LIVE);
+// Inicializar o Stripe com a chave secreta
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Verificar se a chave está configurada corretamente
-if (!process.env.STRIPE_SECRET_KEY_LIVE) {
-    throw new Error('A chave STRIPE_SECRET_KEY_LIVE não está configurada no arquivo .env.');
-}
+module.exports = async (req, res) => {
+    const { amount } = req.body;
 
-const express = require('express');
-const cors = require('cors'); // Middleware de segurança para habilitar CORS
+    console.log("Valor recebido em centavos do frontend:", amount);
 
-const app = express();
+    // Verificar se o valor está presente, é um número válido e maior que zero
+    if (!amount || isNaN(amount) || amount <= 0) {
+        console.error("Erro: Valor inválido ou ausente.");
+        return res.status(400).json({ error: 'Valor inválido ou ausente.' });
+    }
 
-// Middleware para interpretar JSON e habilitar CORS
-app.use(express.json());
-app.use(cors());  // Habilitar CORS para aceitar requisições do frontend
-
-// Endpoint de pagamento
-app.post('/api/payment', async (req, res) => {
     try {
-        const { amount, currency, cardholderName, email, cardType, product } = req.body;
-
-        // Verifique se os campos obrigatórios estão presentes
-        if (!amount || !currency || !cardholderName || !email || !product) {
-            return res.status(400).json({ error: 'Faltam dados obrigatórios no corpo da requisição.' });
-        }
-
-        const supportedCurrencies = ['usd', 'eur', 'brl'];
-
-        // Validar o valor e a moeda
-        if (isNaN(amount) || amount <= 0 || !supportedCurrencies.includes(currency.toLowerCase())) {
-            return res.status(400).json({ error: 'Valor ou moeda inválidos.' });
-        }
-
-        // Criar o PaymentIntent no Stripe
+        // Criar um PaymentIntent com o valor já convertido em centavos pelo frontend
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount), // Certifique-se de enviar o valor em centavos
-            currency: currency,
-            receipt_email: email,
-            description: `Pagamento de ${product} para ${cardholderName}`,
-            metadata: {
-                customer_name: cardholderName,
-                product: product,
-                card_type: cardType  // Armazenar o tipo de cartão informado pelo cliente
-            }
+            amount: amount,  // O valor já está em centavos, não multiplicar por 100
+            currency: 'brl',
         });
 
-        // Log do PaymentIntent para verificação
-        console.log('PaymentIntent criado com sucesso:', paymentIntent.id);
+        console.log("PaymentIntent criado com sucesso:", paymentIntent);
 
         // Enviar o clientSecret ao frontend
-        return res.status(200).json({ clientSecret: paymentIntent.client_secret });
+        res.status(200).json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
         console.error("Erro ao criar PaymentIntent:", error);
-
-        // Tratar erros corretamente para enviar uma resposta adequada
-        if (error.type === 'StripeCardError') {
-            return res.status(400).json({ error: error.message });
-        } else if (error.type === 'StripeInvalidRequestError') {
-            return res.status(400).json({ error: 'Requisição inválida. Verifique os parâmetros enviados.' });
-        } else if (error.type === 'StripeAPIError') {
-            return res.status(500).json({ error: 'Erro no Stripe. Tente novamente mais tarde.' });
-        } else if (error.type === 'StripeConnectionError') {
-            return res.status(503).json({ error: 'Erro de conexão com o Stripe. Tente novamente.' });
-        } else {
-            return res.status(500).json({ error: 'Erro no servidor. Tente novamente mais tarde.' });
-        }
+        res.status(500).json({ error: error.message });
     }
-});
-
-// Iniciar o servidor na porta fornecida pelo ambiente (Vercel atribui automaticamente a porta)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-});
+};
