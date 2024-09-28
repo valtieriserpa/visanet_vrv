@@ -137,6 +137,7 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
+            // Capturar os dados do formulário
             var amount = parseFloat(document.getElementById('amount').value) * 100;  // Converter para centavos
             var cardholderName = document.getElementById('cardholder-name').value;
             var email = document.getElementById('email').value;
@@ -190,13 +191,16 @@
             })
             .then(function(result) {
                 if (result.error) {
+                    // Exibe a mensagem de erro se o pagamento falhar
                     document.getElementById('error-message').textContent = result.error.message;
                 } else {
+                    // Exibe a mensagem de sucesso se o pagamento for bem-sucedido
                     document.getElementById('success-message').textContent = 'Pagamento realizado com sucesso!';
                     window.location.href = '/confirmacao-pagamento'; // Redireciona para página de confirmação
                 }
             })
             .catch(error => {
+                // Exibe o erro se houver falha no processamento do pagamento
                 console.error('Erro ao processar o pagamento:', error);
                 document.getElementById('error-message').textContent = error.message;
             });
