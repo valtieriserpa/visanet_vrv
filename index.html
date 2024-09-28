@@ -111,7 +111,7 @@
     </div>
 
     <script>
-        // Inicialize o Stripe com a chave pública de produção
+        // Inicialize o Stripe com a chave pública
         var stripe = Stripe('pk_test_51Q35jyRwpq1Is6Tt6xvEYLBgmyXlJr4ZDuLC7XBfJC0r45ZJIIDwf31jFFVXew65ZbodJIGXzXnhiqml26VXpr03008N58Ww8U');
 
         var elements = stripe.elements();
@@ -125,8 +125,8 @@
             var amount = parseFloat(document.getElementById('amount').value) * 100;  // Converter para centavos
             var cardholderName = document.getElementById('cardholder-name').value;
             var email = document.getElementById('email').value;
-            var currency = document.getElementById('currency').value;  // Obter a moeda selecionada
-            var cardType = document.getElementById('card-type').value;  // Obter se é crédito ou débito
+            var currency = document.getElementById('currency').value;
+            var cardType = document.getElementById('card-type').value;
 
             fetch('/api/payment', {
                 method: 'POST',
@@ -138,12 +138,14 @@
                     currency: currency,
                     cardholderName: cardholderName,
                     email: email,
-                    cardType: cardType,  // Passar o tipo de cartão para o backend
+                    cardType: cardType,
                     product: 'Consultoria Técnica Sensoriamento Remoto'
                 })
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Client Secret recebido:', data.clientSecret); // Log adicional
+
                 if (data.error) {
                     document.getElementById('error-message').textContent = data.error;
                     return;
@@ -164,15 +166,14 @@
             })
             .then(function(result) {
                 if (result.error) {
-                    // Se houver algum erro na confirmação do pagamento
                     document.getElementById('error-message').textContent = result.error.message;
                 } else {
-                    // Se o pagamento for bem-sucedido
                     alert('Pagamento realizado com sucesso!');
                     window.location.href = '/confirmacao-pagamento'; // Redireciona para página de confirmação
                 }
             })
             .catch(error => {
+                console.error('Erro ao processar o pagamento:', error);
                 document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
             });
         });
