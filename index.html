@@ -47,7 +47,6 @@
             background-color: #45a049;
         }
 
-        /* Ajustando campos do cartão um abaixo do outro */
         .StripeElement {
             padding: 10px;
             border: 1px solid #ccc;
@@ -63,7 +62,6 @@
             margin-top: 10px;
         }
 
-        /* Centralizar a nova logo do Stripe */
         .stripe-logo {
             display: flex;
             justify-content: center;
@@ -74,7 +72,6 @@
             height: 80px;
         }
 
-        /* Estilizando as logomarcas */
         .logos {
             margin-top: 20px;
         }
@@ -87,89 +84,71 @@
 </head>
 <body>
 
-    <!-- Nova Logo Stripe centralizada -->
     <div class="stripe-logo">
         <img src="https://logos-world.net/wp-content/uploads/2021/03/Stripe-Logo.png" alt="Stripe">
     </div>
 
     <h2>Pagar ou Doar - Consultoria Técnica</h2>
 
-    <!-- Formulário de pagamento -->
     <form id="payment-form">
-        <!-- Campo para o nome do cliente -->
         <input type="text" id="name" placeholder="Digite seu nome" required><br>
-
-        <!-- Campo para e-mail -->
         <input type="email" id="email" placeholder="Digite seu e-mail" required><br>
-
-        <!-- Campo de valor ajustado para aceitar valores decimais -->
         <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required><br>
 
-        <!-- Seleção da moeda -->
         <select id="currency" required>
             <option value="brl">Real (BRL)</option>
             <option value="usd">Dólar (USD)</option>
             <option value="eur">Euro (EUR)</option>
         </select><br>
 
-        <div id="card-element" class="field StripeElement"></div> <!-- Stripe Card Element -->
+        <div id="card-element" class="field StripeElement"></div>
         <button type="submit">Pagar</button>
-        <div id="error-message"></div> <!-- Exibe erros -->
+        <div id="error-message"></div>
     </form>
 
-    <!-- Seção com logomarcas dos cartões -->
     <div class="logos">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Visa.svg/1200px-Visa.svg.png" alt="Visa">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png" alt="Mastercard">
     </div>
 
     <script>
-        // Inicialize o Stripe com a chave de produção
+        // Inicialize o Stripe com a chave publicável de produção
         var stripe = Stripe('pk_live_51Q35jyRwpq1Is6TtpYqeyW16I23cd7yXdzWhmagGEiofbCtZnu5ezdajQXLw41BH9x00tBqpkoBpG3o37TYLJuBQ00LoMezdAY');
 
-        // Inicializa os elementos do Stripe
         var elements = stripe.elements();
-        var cardElement = elements.create('card', { hidePostalCode: true }); // Remove o campo CEP
-        cardElement.mount('#card-element'); // Monta o elemento do cartão
+        var cardElement = elements.create('card', { hidePostalCode: true });
+        cardElement.mount('#card-element');
 
-        // Manipula o envio do formulário
         var form = document.getElementById('payment-form');
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o nome, valor, moeda e e-mail digitado no formulário
-            var name = document.getElementById('name').value; // Pega o nome do cliente
-            var email = document.getElementById('email').value; // Pega o e-mail
-            var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
-            var currency = document.getElementById('currency').value; // Pega a moeda selecionada
-            var amountInCents = Math.round(amount * 100); // Converte para centavos
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var amount = parseFloat(document.getElementById('amount').value);
+            var currency = document.getElementById('currency').value;
+            var amountInCents = Math.round(amount * 100);
 
-            // Faz a requisição ao backend para criar o PaymentIntent
-            fetch('/api/payment', { // Esta URL precisa ser ajustada para o backend
+            fetch('/api/payment', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ amount: amountInCents, currency: currency, email: email, name: name }) // Envia o valor em centavos, moeda, email e nome ao backend
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amountInCents, currency: currency, email: email, name: name })
             })
             .then(response => response.json())
             .then(data => {
-                var clientSecret = data.clientSecret; // Recebe o clientSecret do backend
-
-                // Processa o pagamento diretamente na página (sem redirecionar para o checkout do Stripe)
-                stripe.confirmCardPayment(clientSecret, {
+                var clientSecret = data.clientSecret;
+                return stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement
                     }
-                }).then(function(result) {
-                    if (result.error) {
-                        // Exibe erro
-                        document.getElementById('error-message').textContent = result.error.message;
-                    } else {
-                        // Exibe sucesso
-                        alert('Pagamento realizado com sucesso!');
-                    }
                 });
+            })
+            .then(function(result) {
+                if (result.error) {
+                    document.getElementById('error-message').textContent = result.error.message;
+                } else {
+                    alert('Pagamento realizado com sucesso!');
+                }
             })
             .catch(error => {
                 document.getElementById('error-message').textContent = 'Erro ao processar o pagamento';
