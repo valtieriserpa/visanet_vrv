@@ -112,7 +112,7 @@
 
     <script>
         // Inicialize o Stripe com a chave pública de produção
-        var stripe = Stripe('pk_live_51Q3EqMRtRTKpgmmt8gHXvv8qh7sX8PXsFY3g4LTCPEjlvIgLgfGi9S3hht7Y6kWJqGiJ0Tp6bR6Zma8Fmry9YKTX00wFKkei5x');
+        var stripe = Stripe('pk_test_51Q35jyRwpq1Is6Tt6xvEYLBgmyXlJr4ZDuLC7XBfJC0r45ZJIIDwf31jFFVXew65ZbodJIGXzXnhiqml26VXpr03008N58Ww8U');
 
         var elements = stripe.elements();
         var cardElement = elements.create('card', { hidePostalCode: true });
@@ -169,6 +169,7 @@
                 } else {
                     // Se o pagamento for bem-sucedido
                     alert('Pagamento realizado com sucesso!');
+                    window.location.href = '/confirmacao-pagamento'; // Redireciona para página de confirmação
                 }
             })
             .catch(error => {
