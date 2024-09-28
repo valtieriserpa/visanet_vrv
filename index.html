@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagar ou Doar</title>
+    <title>Pagar ou Doar - Consultoria Técnica</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
         /* Fundo com gradiente suave */
@@ -63,7 +63,7 @@
             margin-top: 10px;
         }
 
-        /* Centralizar a logo do Stripe */
+        /* Centralizar a nova logo do Stripe */
         .stripe-logo {
             display: flex;
             justify-content: center;
@@ -87,17 +87,20 @@
 </head>
 <body>
 
-    <!-- Logo Stripe centralizada -->
+    <!-- Nova Logo Stripe centralizada -->
     <div class="stripe-logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" alt="Stripe">
+        <img src="https://logos-world.net/wp-content/uploads/2021/03/Stripe-Logo.png" alt="Stripe">
     </div>
 
-    <h2>Pagar ou Doar</h2>
+    <h2>Pagar ou Doar - Consultoria Técnica</h2>
 
     <!-- Formulário de pagamento -->
     <form id="payment-form">
         <!-- Campo de valor ajustado para aceitar valores decimais -->
         <input type="number" id="amount" class="amount" placeholder="Digite o valor" min="0.01" step="0.01" required><br>
+
+        <!-- Campo para e-mail -->
+        <input type="email" id="email" placeholder="Digite seu e-mail" required><br>
 
         <!-- Seleção da moeda -->
         <select id="currency" required>
@@ -131,9 +134,11 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Obtenha o valor digitado no campo de valor e a moeda selecionada
+            // Obtenha o valor, moeda e e-mail digitado no formulário
             var amount = parseFloat(document.getElementById('amount').value); // Pega o valor com casas decimais
             var currency = document.getElementById('currency').value; // Pega a moeda selecionada
+            var email = document.getElementById('email').value; // Pega o e-mail
+
             var amountInCents = Math.round(amount * 100); // Converte para centavos
 
             // Faz a requisição ao backend para criar o PaymentIntent
@@ -142,7 +147,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ amount: amountInCents, currency: currency }) // Envia o valor em centavos e a moeda ao backend
+                body: JSON.stringify({ amount: amountInCents, currency: currency, email: email }) // Envia o valor em centavos, moeda e email ao backend
             })
             .then(response => response.json())
             .then(data => {
