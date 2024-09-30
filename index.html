@@ -129,6 +129,9 @@
             var currency = document.getElementById('currency').value;
             var amountInCents = Math.round(amount * 100);
 
+            // Log para verificar o valor correto
+            console.log("Valor enviado em centavos:", amountInCents);
+
             fetch('/api/payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
