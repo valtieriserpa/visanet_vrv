@@ -136,6 +136,7 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log("Client Secret recebido:", data.clientSecret);
                 var clientSecret = data.clientSecret;
                 return stripe.confirmCardPayment(clientSecret, {
                     payment_method: {

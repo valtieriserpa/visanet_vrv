@@ -32,9 +32,14 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Converter o valor para centavos (necessário para Stripe)
+        const amountInCents = Math.round(amount * 100);
+
+        console.log("Valor recebido em centavos:", amountInCents);
+
         // Criar um PaymentIntent com o valor, moeda, nome e e-mail
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,  // O valor já está em centavos
+            amount: amountInCents,  // O valor já está em centavos
             currency: currency,  // Define a moeda escolhida (BRL, USD ou EUR)
             receipt_email: email,  // Associar o e-mail ao pagamento
             metadata: { customer_name: name },  // Armazena o nome do cliente como metadata
